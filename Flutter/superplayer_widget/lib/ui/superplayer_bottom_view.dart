@@ -182,7 +182,7 @@ class _VideoBottomViewState extends State<VideoBottomView> {
           }
         },
         // 直播禁止时移
-        canDrag: _playerType == SuperPlayerType.VOD,
+        canDrag: widget._playerController.canDrag?_playerType == SuperPlayerType.VOD:widget._playerController.canDrag,
         playPoints: !_showFullScreenBtn ? _playPoints : [],
         onDragUpdate: (value) {
           _isOnDraging = true;

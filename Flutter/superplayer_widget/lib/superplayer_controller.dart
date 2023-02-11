@@ -62,6 +62,8 @@ class SuperPlayerController {
   double videoHeight = 0;
   double currentPlayRate = 1.0;
 
+  bool canDrag=false;
+
   SuperPlayerController(this._context) {
     _initVodPlayer();
     _initLivePlayer();
