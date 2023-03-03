@@ -331,6 +331,8 @@ class SuperPlayerController {
     _observer?.onVideoImageSpriteAndKeyFrameChanged(spriteInfo, keyFrameInfo);
     if (null != spriteInfo) {
       _vodPlayerController.initImageSprite(spriteInfo.webVttUrl, spriteInfo.imageUrls);
+    } else {
+      _vodPlayerController.initImageSprite(null, null);
     }
     this.spriteInfo = spriteInfo;
     this.keyFrameInfo = keyFrameInfo;
