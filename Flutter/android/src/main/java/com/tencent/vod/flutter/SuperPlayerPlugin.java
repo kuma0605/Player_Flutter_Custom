@@ -7,9 +7,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,7 +23,9 @@ import android.util.SparseArray;
 import android.view.OrientationEventListener;
 import android.view.Window;
 import android.view.WindowManager;
+
 import androidx.annotation.NonNull;
+
 import com.tencent.rtmp.TXLiveBase;
 import com.tencent.rtmp.TXPlayerGlobalSetting;
 import com.tencent.vod.flutter.messages.FTXLivePlayerDispatcher;
@@ -36,17 +40,20 @@ import com.tencent.vod.flutter.messages.FtxMessages.TXFlutterLivePlayerApi;
 import com.tencent.vod.flutter.messages.FtxMessages.TXFlutterNativeAPI;
 import com.tencent.vod.flutter.messages.FtxMessages.TXFlutterSuperPlayerPluginAPI;
 import com.tencent.vod.flutter.messages.FtxMessages.TXFlutterVodPlayerApi;
+import com.tencent.vod.flutter.tools.CommonUtil;
 import com.tencent.vod.flutter.ui.Android12BridgeService;
-import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.embedding.engine.plugins.activity.ActivityAware;
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
-import io.flutter.plugin.common.EventChannel;
+
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.plugin.common.EventChannel;
 
 /**
  * SuperPlayerPlugin
@@ -326,12 +333,38 @@ public class SuperPlayerPlugin implements FlutterPlugin, ActivityAware,
         float screenBrightness = -1;
         try {
             ContentResolver resolver = mActivityPluginBinding.getActivity().getContentResolver();
-            int brightnessInt = Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS);
-            screenBrightness = brightnessInt / 255F;
+            final int brightnessInt = Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS);
+            final float maxBrightness = getBrightnessMax();
+            screenBrightness = brightnessInt / maxBrightness;
         } catch (SettingNotFoundException e) {
             e.printStackTrace();
         }
         return screenBrightness;
+    }
+
+    /**
+     * 获取最大亮度,兼容MIUI部分系统亮度最大值不是255的情况.
+     * MIUI在android 13以后，系统最大亮度与配置不符，变为128
+     *
+     * @return max
+     */
+    private float getBrightnessMax() {
+        if (CommonUtil.isMIUI()) {
+            if (Build.VERSION.SDK_INT < 33) {
+                try {
+                    Resources system = Resources.getSystem();
+                    int resId = system.getIdentifier("config_screenBrightnessSettingMaximum", "integer", "android");
+                    if (resId != 0) {
+                        return system.getInteger(resId);
+                    }
+                } catch (Exception e) {
+                    Log.getStackTraceString(e);
+                }
+            } else {
+                return 128;
+            }
+        }
+        return 255F;
     }
 
     private void initAudioManagerIfNeed() {

@@ -33,6 +33,8 @@ import com.tencent.vod.flutter.messages.FtxMessages.TXPlayInfoParamsPlayerMsg;
 import com.tencent.vod.flutter.messages.FtxMessages.UInt8ListMsg;
 import com.tencent.vod.flutter.model.PipResult;
 import com.tencent.vod.flutter.model.VideoModel;
+import com.tencent.vod.flutter.tools.CommonUtil;
+
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.view.TextureRegistry;
@@ -649,6 +651,9 @@ public class FTXVodPlayer extends FTXBasePlayer implements ITXVodPlayListener, F
                 getPlayerId());
         mPipParams.setIsPlaying(isPlayerPlaying());
         mPipParams.setCurrentPlayTime(getPlayerCurrentPlaybackTime());
+        if (null != mVodPlayer) {
+            mPipParams.setRadio(mVodPlayer.getWidth(), mVodPlayer.getHeight());
+        }
         int pipResult = mPipManager.enterPip(mPipParams, mVideoModel);
         // 启动成功之后，暂停当前界面视频
         if (pipResult == FTXEvent.NO_ERROR) {

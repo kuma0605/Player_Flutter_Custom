@@ -23,9 +23,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Rational;
+
 import androidx.annotation.RequiresApi;
 import com.tencent.vod.flutter.model.PipResult;
 import com.tencent.vod.flutter.model.VideoModel;
+import com.tencent.vod.flutter.tools.CommonUtil;
 import com.tencent.vod.flutter.ui.FlutterPipImplActivity;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
@@ -260,6 +263,8 @@ public class FTXPIPManager {
         private final boolean mIsNeedPlayControl;
         private boolean mIsPlaying = false;
         private float mCurrentPlayTime = 0;
+        private int mViewWith = 16;
+        private int mViewHeight = 9;
 
         /**
          * 画中画参数
@@ -333,6 +338,19 @@ public class FTXPIPManager {
             this.mCurrentPlayTime = mCurrentPlayTime;
         }
 
+        public void setRadio(int width, int height) {
+            mViewWith = width;
+            mViewHeight = height;
+        }
+
+        public int geiRadioWith() {
+            return mViewWith;
+        }
+
+        public int getRadioHeight() {
+            return mViewHeight;
+        }
+
         /**
          * 构造画中画参数
          */
@@ -381,6 +399,11 @@ public class FTXPIPManager {
 
             Builder mPipParams = new Builder();
             mPipParams.setActions(actions);
+            mPipParams.setAspectRatio(new Rational(mViewWith, mViewHeight));
+            if (Build.VERSION.SDK_INT >= VERSION_CODES.S) {
+                mPipParams.setAutoEnterEnabled(false);
+                mPipParams.setSeamlessResizeEnabled(false);
+            }
             return mPipParams.build();
         }
 
